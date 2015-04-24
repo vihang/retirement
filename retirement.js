@@ -65,15 +65,18 @@ var UserData = (function(){
     getFinalIncome: function() {
       return _.clone(this.getAnnualIncome()).reverse()[0];
     },
+    getInitialRetirementIncome: function(){
+      return this.getFinalIncome() * (this.get("incomeRequired")/100);
+    },
     //we need to plot not only the growing balance, but the balance once withdrawals start
     getFullRetirementBalances: function(){
       var retirementBalance = this.getRetirementTotal();
-      var retirementIncome = this.getFinalIncome() * (this.get("incomeRequired")/100);
+      var retirementIncome = this.getInitialRetirementIncome();
       //increase based on rate after
       //then minus retirementIncome
       var retirementTotal = _.clone(retirementBalance).reverse()[0];
 
-      for(var i = 0; i < 35; i++) {
+      for(var i = 0; i < (110 - this.get("retirementAge")); i++) {
         retirementTotal *= (1 + this.get("rateAfter")/100);
         retirementTotal -= retirementIncome;
         retirementIncome *= (1 + this.get("inflation")/100);
@@ -110,7 +113,9 @@ var RetirementCalc = (function() {
           //Boolean - Whether to fill the dataset with a colour
           datasetFill : true,
           animationSteps: 1,
-          pointDot: false
+          pointDot: false,
+          scaleShowVerticalLines: false,
+          showTooltips: false
       };
       var data = {
         labels:[],
@@ -134,17 +139,17 @@ var RetirementCalc = (function() {
             pointHighlightFill: "#fff",
             pointHighlightStroke: "rgba(151,187,205,1)",
             data: []
-          }//,
-          // {
-          //   label: "Amount withdrawn",
-          //   fillColor: "rgba(175,235,139,0.2)",
-          //   strokeColor: "rgba(175,235,139,1)",
-          //   pointColor: "rgba(175,235,139,1)",
-          //   pointStrokeColor: "#fff",
-          //   pointHighlightFill: "#fff",
-          //   pointHighlightStroke: "rgba(175,235,139,1)",
-          //   data: []
-          // }
+          },
+          {
+            label: "Goal Income",
+            fillColor: "rgba(175,235,139,0.2)",
+            strokeColor: "rgba(175,235,139,1)",
+            pointColor: "rgba(175,235,139,1)",
+            pointStrokeColor: "#fff",
+            pointHighlightFill: "#fff",
+            pointHighlightStroke: "rgba(175,235,139,1)",
+            data: []
+          }
         ]
       }
       
@@ -153,7 +158,7 @@ var RetirementCalc = (function() {
       var self = this;
       //for each item in our Line Chart Data, update our line chart object
       _.each(this.getLineChartData(), function(row){
-        self.lineChart.addData([row.balance], row.age);
+        self.lineChart.addData([row.balance, row.goal], row.age);
       });
     },
     getLineChartData: function(){
@@ -161,26 +166,39 @@ var RetirementCalc = (function() {
       var age = this.userData.get("currentAge");
       var retirementAmounts = this.userData.getFullRetirementBalances();
       var self = this;
+      var ageLabel;
+      var goalIncome = 0;
 
       _(retirementAmounts).forEach(function(n){
-        lineChartData.push({
-          //multiply SSN times inflation rate???
-          balance: Math.round((n - (self.userData.getSocialSecurity() * self.userData.get("inflation")/100))),
-          age: "age: " + age
-        });
+        ageLabel = (age%5 === 0) ? ("age: " + age) : "";
+
+        //As soon as they are retirement age, we want to record their desired income
+        if(age === toFloat(self.userData.get("retirementAge"))) {
+          goalIncome = self.userData.getInitialRetirementIncome();
+        }
+        //adjust the desired income for inflation
+        goalIncome *= (1 + self.userData.get("inflation")/100);
+
+        if(age%5 === 0) {
+          lineChartData.push({
+            //figure out SSN rate
+            balance: Math.round((n - (self.userData.getSocialSecurity() * self.userData.get("inflation")/100))),
+            goal: Math.round(goalIncome),
+            age: ageLabel
+          });
+        }
+        
         age++;
       }).value();//end forEach
 
-      console.log(lineChartData);
       return lineChartData;
     },
     updateLineChart: function(){
       this.lineChart.options.animationSteps = 30;
       row = this.getLineChartData();
       for(var i=0; i < row.length; i++){
-        this.lineChart.datasets[0].points[i].value = row[i].conservativePayment;
-        this.lineChart.datasets[1].points[i].value = row[i].standardPayment;
-        this.lineChart.datasets[2].points[i].value = row[i].aggressivePayment;
+        this.lineChart.datasets[0].points[i].value = row[i].balance;
+        this.lineChart.datasets[1].points[i].value = row[i].goal;
         this.lineChart.update();
       }
     }
@@ -197,6 +215,34 @@ function initialize(userData, rc) {
   });
 
   //rc.defineLineChart();
+}
+
+function isThereAChange(userData) {
+  var types = ["currentAge",
+      "retirementAge",
+      "annualIncome",
+      "retirementSavings",
+      "currentRetirement",
+      "expectedIncrease",
+      "incomeRequired",
+      "rateBefore",
+      "rateAfter",
+      "inflation"
+      ]
+  return _.any(types, function(type) {
+    return toFloat(document.retirementInputs[type].value) !== userData.get(type);
+  });
+}
+
+//set the data in our userData object to match the form values
+function updateUserData(userData, field) {
+  userData.set(field, document.retirementInputs[field].value);
+}
+
+function toFloat(element) {
+  //we divide by 1 to ensure that it is a number
+  //otherwise, it returns NaN
+  return element/1;
 }
 
 //set our values to string and add commas and a dollar sign
@@ -216,14 +262,7 @@ function moneyFormat(s) {
 
 function resetFormValues(userData) {
   var alertText = false;
-  if(!userData.isNumeric(document.retirementInputs.intRate.value)) {
-    document.retirementInputs.intRate.value = 4;
-    alertText = true; 
-  }
-  if(!userData.isNumeric(document.retirementInputs.mortgageAmount.value)){
-    document.retirementInputs.mortgageAmount.value = 200000; 
-    alertText = true;    
-  }
+  
   //add the alert text to the bottom of our form
   if(alertText) {
     $('#alertText').removeClass('hidden');
@@ -245,8 +284,11 @@ $(document).ready(function() {
 
   rc.defineLineChart();
 
-  $(":input").blur(function(){
-
+  $(":input").blur(function(element){
+    if(isThereAChange(userData)){
+      updateUserData(userData, element.currentTarget.attributes.name.nodeValue);
+      rc.updateLineChart();
+    }
   });
 });
 
