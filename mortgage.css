@@ -1,0 +1,82 @@
+body {
+	background: #f6f6f6;
+}
+
+#sidebar {
+	width: 30%;
+	float: left;
+	height: 100%;
+}
+
+#results {
+	width: 60%;
+	margin-left: 100px;
+	float: left;
+}
+
+.hidden {
+	display: none;
+}
+
+.bolded {
+	font-weight: bold;
+}
+
+.container {
+	width: 90%;
+	margin: auto;
+}
+.red {
+	color: red;
+	font-style: italic;
+}
+
+#retirementInputs {
+  color: rgb(88, 88, 88);
+  display: block;
+  font-family: SOG-Volkhov, serif;
+  font-size: 110%;
+  line-height: 25.7142868041992px;
+}
+
+#retirementInputs label {
+  color: rgb(10, 33, 38);
+  display: block;
+  font-family: SOG-Volkhov, serif;
+  font-size: 140%;
+  line-height: 50px;
+  margin-top: 0px;
+}
+input {
+  background-color: #f6f6f6;
+  border-bottom-color: rgb(221, 221, 221);
+  border-bottom-style: dashed;
+  border-bottom-width: 1px;
+  border-left-style: none;
+  border-right-style: none;
+  border-top-style: none;
+  box-sizing: border-box;
+  color: rgb(125, 224, 176);
+  display: inline-block;
+  font-family: SOG-Volkhov, serif;
+  font-size: 27px;
+  font-style: italic;
+}
+*:focus{
+    outline: 0;
+}
+.aggressive {
+	color: rgba(175,235,139,1);
+	font-weight: bold;
+}
+.standard {
+	color: rgba(151,187,205,1);
+	font-weight: bold;
+}
+.conservative {
+	color: rgba(220,220,220,1);
+	font-weight: bold;
+}
+
+
+
