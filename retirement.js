@@ -63,13 +63,29 @@ var UserData = (function(){
     },
     //how much were they making at the end?
     getFinalIncome: function() {
-      var finalIncome = this.getAnnualIncome().reverse();
-      return finalIncome[0];
+      return _.clone(this.getAnnualIncome()).reverse()[0];
     },
-    //we need to plot not only the growing balance, but the balance once withdrawal start
+    //we need to plot not only the growing balance, but the balance once withdrawals start
     getFullRetirementBalances: function(){
       var retirementBalance = this.getRetirementTotal();
-      
+      var retirementIncome = this.getFinalIncome() * (this.get("incomeRequired")/100);
+      //increase based on rate after
+      //then minus retirementIncome
+      var retirementTotal = _.clone(retirementBalance).reverse()[0];
+
+      for(var i = 0; i < 35; i++) {
+        retirementTotal *= (1 + this.get("rateAfter")/100);
+        retirementTotal -= retirementIncome;
+        retirementIncome *= (1 + this.get("inflation")/100);
+        retirementTotal = (retirementTotal < 0) ? 0 : retirementTotal;
+        retirementBalance.push(retirementTotal);
+      }
+      return retirementBalance;
+    },
+    getSocialSecurity: function(){
+      //need to derived ss amount;
+      var socialSecurity = 0;
+      return socialSecurity;
     }
   }
   return constructor;
@@ -93,21 +109,22 @@ var RetirementCalc = (function() {
       var options = {
           //Boolean - Whether to fill the dataset with a colour
           datasetFill : true,
-          animationSteps: 1
+          animationSteps: 1,
+          pointDot: false
       };
       var data = {
         labels:[],
         datasets: [
-          {
-            label: "Goal income",
-            fillColor: "rgba(220,220,220,0.2)",
-            strokeColor: "rgba(220,220,220,1)",
-            pointColor: "rgba(220,220,220,1)",
-            pointStrokeColor: "#fff",
-            pointHighlightFill: "#fff",
-            pointHighlightStroke: "rgba(220,220,220,1)",
-            data: []
-          },
+          // {
+          //   label: "Goal income",
+          //   fillColor: "rgba(220,220,220,0.2)",
+          //   strokeColor: "rgba(220,220,220,1)",
+          //   pointColor: "rgba(220,220,220,1)",
+          //   pointStrokeColor: "#fff",
+          //   pointHighlightFill: "#fff",
+          //   pointHighlightStroke: "rgba(220,220,220,1)",
+          //   data: []
+          // },
           {
             label: "Retirement Savings",
             fillColor: "rgba(151,187,205,0.2)",
@@ -117,17 +134,17 @@ var RetirementCalc = (function() {
             pointHighlightFill: "#fff",
             pointHighlightStroke: "rgba(151,187,205,1)",
             data: []
-          },
-          {
-            label: "Amount withdrawn",
-            fillColor: "rgba(175,235,139,0.2)",
-            strokeColor: "rgba(175,235,139,1)",
-            pointColor: "rgba(175,235,139,1)",
-            pointStrokeColor: "#fff",
-            pointHighlightFill: "#fff",
-            pointHighlightStroke: "rgba(175,235,139,1)",
-            data: []
-          }
+          }//,
+          // {
+          //   label: "Amount withdrawn",
+          //   fillColor: "rgba(175,235,139,0.2)",
+          //   strokeColor: "rgba(175,235,139,1)",
+          //   pointColor: "rgba(175,235,139,1)",
+          //   pointStrokeColor: "#fff",
+          //   pointHighlightFill: "#fff",
+          //   pointHighlightStroke: "rgba(175,235,139,1)",
+          //   data: []
+          // }
         ]
       }
       
@@ -136,18 +153,27 @@ var RetirementCalc = (function() {
       var self = this;
       //for each item in our Line Chart Data, update our line chart object
       _.each(this.getLineChartData(), function(row){
-        self.lineChart.addData([row.conservativePayment, row.standardPayment, row.aggressivePayment], row.year);
+        self.lineChart.addData([row.balance], row.age);
       });
     },
-    // getLineChartData: function(){
-    //   var lineChartData = [];
-    //     lineChartData.push({
-          
-    //     });
-        
-    //   } //end for
-    //   return lineChartData;
-    // },
+    getLineChartData: function(){
+      var lineChartData = [];
+      var age = this.userData.get("currentAge");
+      var retirementAmounts = this.userData.getFullRetirementBalances();
+      var self = this;
+
+      _(retirementAmounts).forEach(function(n){
+        lineChartData.push({
+          //multiply SSN times inflation rate???
+          balance: Math.round((n - (self.userData.getSocialSecurity() * self.userData.get("inflation")/100))),
+          age: "age: " + age
+        });
+        age++;
+      }).value();//end forEach
+
+      console.log(lineChartData);
+      return lineChartData;
+    },
     updateLineChart: function(){
       this.lineChart.options.animationSteps = 30;
       row = this.getLineChartData();
@@ -215,8 +241,9 @@ $(document).ready(function() {
     $("#lineChart").get(0).getContext("2d"),
     userData
   );
-  console.log(userData.getRetirementTotal());
   initialize(userData, rc);
+
+  rc.defineLineChart();
 
   $(":input").blur(function(){
 
