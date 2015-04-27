@@ -50,7 +50,6 @@ var UserData = (function(){
 
       _(this.getAnnualIncome()).forEach(function(n){
         annualContributions.push(n * (self.get("retirementSavings")/100));
-        console.log("age " + age + " contribution is: " + n * (self.get("retirementSavings")/100));
         age++;
       }).value();
       return annualContributions;
@@ -63,8 +62,6 @@ var UserData = (function(){
 
       _(this.getAnnualContributions()).forEach(function(contribution){
         //increase based on rate before retirement
-        console.log(retirement * self.get("rateBefore")/100);
-
         retirement *= (1 + (self.get("rateBefore")/100));
         retirement += contribution;
         //create an array with our growing balance for the line chart
@@ -114,19 +111,27 @@ var UserData = (function(){
       //TODO get the age of retirement. if under 66, 75%
       var socialSecurity = 0;
       var currentYearMax = 117000;
+      var finalIncome = this.getFinalIncome();
       var monthlyAverage;
 
-      if(this.getFinalIncome() >= currentYearMax) {
+      if(finalIncome >= currentYearMax) {
         monthlyAverage = currentYearMax/12;
-        // 90% of first 826
-        // 32% of 826 through 4980
-        // 15% above 4980
+      } else {
+        monthlyAverage = finalIncome/12;
+      }
+
+      //if the monthly average is less than 4980, take 32% of 826 less the total
+      if(monthlyAverage < 4980) {
+        monthlyAverage -= 826;
+        monthlyAverage *= 0.32;
+      } else {
         monthlyAverage -= 4980;
         monthlyAverage *= 0.15;
         monthlyAverage += ((4980 - 826) * 0.32);
-        monthlyAverage += (826 * 0.9);
-        socialSecurity = monthlyAverage * 12;
       }
+      monthlyAverage += (826 * 0.9);
+      monthlyAverage = (monthlyAverage < 0) ? 0 : monthlyAverage;
+      socialSecurity = monthlyAverage * 12;
       //if we don't want to include SS on our chart
       if(this.get("includeSS") == 0) {
         socialSecurity = 0;
@@ -171,16 +176,6 @@ var RetirementCalc = (function() {
         labels:[],
         datasets: [
           {
-            label: "Social Security",
-            fillColor: "rgba(220,220,220,0.2)",
-            strokeColor: "rgba(220,220,220,1)",
-            pointColor: "rgba(220,220,220,1)",
-            pointStrokeColor: "#fff",
-            pointHighlightFill: "#fff",
-            pointHighlightStroke: "rgba(220,220,220,1)",
-            data: []
-          },
-          {
             label: "Retirement Savings",
             fillColor: "rgba(151,187,205,0.2)",
             strokeColor: "rgba(151,187,205,1)",
@@ -208,7 +203,7 @@ var RetirementCalc = (function() {
       var self = this;
       //for each item in our Line Chart Data, update our line chart object
       _.each(this.getLineChartData(), function(row){
-        self.lineChart.addData([row.ss, row.balance, row.goal], row.age);
+        self.lineChart.addData([row.balance, row.goal], row.age);
       });
     },
     getLineChartData: function(){
@@ -234,7 +229,6 @@ var RetirementCalc = (function() {
         if(age%2 === 0) {
           lineChartData.push({
             //figure out SSN rate
-            ss: Math.round(socialSecurity),
             balance: Math.round(n),
             goal: Math.round(goalIncome),
             age: ageLabel
@@ -249,9 +243,8 @@ var RetirementCalc = (function() {
       this.lineChart.options.animationSteps = 30;
       row = this.getLineChartData();
       for(var i=0; i < row.length; i++){
-        this.lineChart.datasets[0].points[i].value = row[i].ss;
-        this.lineChart.datasets[1].points[i].value = row[i].balance;
-        this.lineChart.datasets[2].points[i].value = row[i].goal;
+        this.lineChart.datasets[0].points[i].value = row[i].balance;
+        this.lineChart.datasets[1].points[i].value = row[i].goal;
         this.lineChart.update();
       }
     }
@@ -331,6 +324,7 @@ function fillForm(userData) {
   $("#retirementAmount").text(moneyFormat(userData.getRetirementTotal().reverse()[0]));
   $("#incomeAtRetirement").text(moneyFormat(userData.getFinalIncome()));
   $("#incomeAfterRetirement").text(moneyFormat(userData.getInitialRetirementIncome()));
+  $("#initialSS").text(moneyFormat(userData.getSocialSecurity()));
 }
 
 //once our page is loaded
