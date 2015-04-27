@@ -50,7 +50,7 @@ var UserData = (function(){
     },
     //get the total cost of our retirement, compounded annually
     getRetirementTotal: function() {
-      var retirement = toFloat(this.get("currentRetirement"));
+      var retirement = this.get("currentRetirement");
       var plotPoints = [];
       var self = this;
       _(this.getAnnualContributions()).forEach(function(contribution){
@@ -104,10 +104,15 @@ var UserData = (function(){
         monthlyAverage += (826 * 0.9);
         socialSecurity = monthlyAverage;
       }
-      if(toFloat(this.get("includeSS")) == 0) {
-        console.log("true");
+      if(this.get("includeSS") == 0) {
         socialSecurity = 0;
       }
+       console.log(this.data);
+      //if they retire before 66, they only get 75%
+      if(this.get("retirementAge") < 66) {
+        socialSecurity *= 0.75;
+      }
+
       return socialSecurity * 12;
     }
   }
@@ -197,13 +202,13 @@ var RetirementCalc = (function() {
         ageLabel = (age%5 === 0) ? ("age: " + age) : "";
 
         //As soon as they are retirement age, we want to record their desired income
-        if(age === toFloat(self.userData.get("retirementAge"))) {
+        if(age === self.userData.get("retirementAge")) {
           goalIncome = self.userData.getInitialRetirementIncome();
         }
         //adjust the desired income for inflation
         goalIncome *= (1 + self.userData.get("inflation")/100);
 
-        if(age < self.userData.get("retirementAge")) {
+        if(age < toFloat(self.userData.get("retirementAge"))) {
           socialSecurity = 0;
         } else if(age === self.userData.get("retirementAge")) {
           socialSecurity = self.userData.getSocialSecurity();
@@ -269,8 +274,7 @@ function isThereAChange(userData) {
 
 //set the data in our userData object to match the form values
 function updateUserData(userData, field) {
-  console.log("field is: " + field);
-  userData.set(field, document.retirementInputs[field].value);
+  userData.set(field, toFloat(document.retirementInputs[field].value));
 }
 
 function toFloat(element) {
@@ -294,13 +298,15 @@ function moneyFormat(s) {
   return s;
 }
 
-function resetFormValues(userData) {
-  var alertText = false;
-  
-  //add the alert text to the bottom of our form
-  if(alertText) {
+//if they enter invalid information, reset it ot the default values
+function resetFormValues(userData, field) {
+  var val = document.retirementInputs[field].value;
+
+  if(!userData.isNumeric(val)) {
+    document.retirementInputs[field].value = userData.defaults[field];
     $('#alertText').removeClass('hidden');
-  } else {
+  }
+  else {
     $('#alertText').addClass('hidden');
   }
 }
@@ -324,8 +330,8 @@ $(document).ready(function() {
 
   $(":input").blur(function(element){
     if(isThereAChange(userData)){
+      resetFormValues(userData, element.currentTarget.attributes.name.nodeValue);
       updateUserData(userData, element.currentTarget.attributes.name.nodeValue);
-
       fillForm(userData);
       rc.updateLineChart();
     }
