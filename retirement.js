@@ -33,8 +33,11 @@ var UserData = (function(){
       var yearsTilRetire = this.get("retirementAge") - this.get("currentAge");
       var annualIncomeArray = [];
       var income = this.get("annualIncome");
+
       for(var i = 0; i < yearsTilRetire; i++) {
-        income *= 1 + this.get("expectedIncrease")/100;
+        if(i > 0) {
+          income *= (1 + (this.get("expectedIncrease")/100));
+        }
         annualIncomeArray.push(income);
       }
       return annualIncomeArray;
@@ -43,8 +46,12 @@ var UserData = (function(){
     getAnnualContributions: function(){
       var annualContributions = [];
       var self = this;
+      var age = this.get("currentAge");
+
       _(this.getAnnualIncome()).forEach(function(n){
         annualContributions.push(n * (self.get("retirementSavings")/100));
+        console.log("age " + age + " contribution is: " + n * (self.get("retirementSavings")/100));
+        age++;
       }).value();
       return annualContributions;
     },
@@ -53,10 +60,13 @@ var UserData = (function(){
       var retirement = this.get("currentRetirement");
       var plotPoints = [];
       var self = this;
+
       _(this.getAnnualContributions()).forEach(function(contribution){
         //increase based on rate before retirement
+        console.log(retirement * self.get("rateBefore")/100);
+
+        retirement *= (1 + (self.get("rateBefore")/100));
         retirement += contribution;
-        retirement *= 1 + (self.get("rateBefore")/100);
         //create an array with our growing balance for the line chart
         plotPoints.push(retirement);
       }).value();
@@ -73,16 +83,29 @@ var UserData = (function(){
     getFullRetirementBalances: function(){
       var retirementBalance = this.getRetirementTotal();
       var retirementIncome = this.getInitialRetirementIncome();
-      //increase based on rate after
-      //then minus retirementIncome
       var retirementTotal = _.clone(retirementBalance).reverse()[0];
+      var age = this.get("currentAge");
+      var year = new Date().getFullYear();
+      var socialSecurity = this.getSocialSecurity();;
 
       for(var i = 0; i < (110 - this.get("retirementAge")); i++) {
+
+        //social security shoul dbe 75% of normal value if after the year 2037
+        if(i ===0 && year > 2037) {
+          socialSecurity *= 0.75;
+        }
+
         retirementTotal *= (1 + this.get("rateAfter")/100);
         retirementTotal -= retirementIncome;
         retirementIncome *= (1 + this.get("inflation")/100);
         retirementTotal = (retirementTotal < 0) ? 0 : retirementTotal;
-        retirementBalance.push(retirementTotal);
+        retirementBalance.push(retirementTotal + socialSecurity);
+
+        //increase social security by inflation
+        socialSecurity *= (1 + this.get("inflation")/100);
+
+        age++;
+        year++;
       }
       return retirementBalance;
     },
@@ -102,8 +125,9 @@ var UserData = (function(){
         monthlyAverage *= 0.15;
         monthlyAverage += ((4980 - 826) * 0.32);
         monthlyAverage += (826 * 0.9);
-        socialSecurity = monthlyAverage;
+        socialSecurity = monthlyAverage * 12;
       }
+      //if we don't want to include SS on our chart
       if(this.get("includeSS") == 0) {
         socialSecurity = 0;
       }
@@ -112,7 +136,7 @@ var UserData = (function(){
         socialSecurity *= 0.75;
       }
 
-      return socialSecurity * 12;
+      return socialSecurity;
     }
   }
   return constructor;
@@ -195,7 +219,6 @@ var RetirementCalc = (function() {
       var ageLabel;
       var goalIncome = 0;
       var socialSecurity = 0;
-      var year = new Date().getFullYear();
 
       _(retirementAmounts).forEach(function(n){
         ageLabel = (age%5 === 0) ? ("age: " + age) : "";
@@ -207,33 +230,18 @@ var RetirementCalc = (function() {
         //adjust the desired income for inflation
         goalIncome *= (1 + self.userData.get("inflation")/100);
 
-        //Don't count social security until they reach retirement age
-        if(age < self.userData.get("retirementAge")) {
-          socialSecurity = 0;
-        } else if(age === self.userData.get("retirementAge")) {
-          socialSecurity = self.userData.getSocialSecurity();
-          //social security shoul dbe 75% of normal value if after the year 2037
-          if(year > 2037) {
-            socialSecurity *= 0.75;
-          }
-        }
-
         //control how often we plot our data.  Doing it every year slows down the animation
         if(age%2 === 0) {
           lineChartData.push({
             //figure out SSN rate
             ss: Math.round(socialSecurity),
-            balance: Math.round(n + socialSecurity),
+            balance: Math.round(n),
             goal: Math.round(goalIncome),
             age: ageLabel
           });
         }
-        
-        //increase social security by inflation
-        socialSecurity *= (1 + self.userData.get("inflation")/100);
 
         age++;
-        year++;
       }).value();//end forEach
       return lineChartData;
     },
@@ -351,12 +359,6 @@ $(document).ready(function() {
 
 
 /* TODO
-
-I'd like to change the graph a bit.  They have one line of the graph labelled "total expenses" but what it actually shows is the amount of retirement account withdrawals to meet income needed.  
-It would be nice to replace that line with an "income target" line which would graph the income target year-by-year based on the %income replacement they provided, and add a "income actual" 
-line which shows the income possible from retirement savings withdrawals and social security...so if they run out of retirement savings they would still have some income from social security 
-and they could see the gap between target and actual income projected.  
-We should also add some info to help them think about what their income need might be in retirement; how expenses change and what is a reasonable/typical income replacement % to plan with.
 
 
 if after 2037 75% SS
