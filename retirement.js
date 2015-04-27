@@ -98,16 +98,15 @@ var UserData = (function(){
         // 90% of first 826
         // 32% of 826 through 4980
         // 15% above 4980
-        monthlyAverage -= 5806;
+        monthlyAverage -= 4980;
         monthlyAverage *= 0.15;
-        monthlyAverage += (5806 * 0.32);
+        monthlyAverage += ((4980 - 826) * 0.32);
         monthlyAverage += (826 * 0.9);
         socialSecurity = monthlyAverage;
       }
       if(this.get("includeSS") == 0) {
         socialSecurity = 0;
       }
-       console.log(this.data);
       //if they retire before 66, they only get 75%
       if(this.get("retirementAge") < 66) {
         socialSecurity *= 0.75;
@@ -208,10 +207,15 @@ var RetirementCalc = (function() {
         //adjust the desired income for inflation
         goalIncome *= (1 + self.userData.get("inflation")/100);
 
-        if(age < toFloat(self.userData.get("retirementAge"))) {
+        //Don't count social security until they reach retirement age
+        if(age < self.userData.get("retirementAge")) {
           socialSecurity = 0;
         } else if(age === self.userData.get("retirementAge")) {
           socialSecurity = self.userData.getSocialSecurity();
+          //social security shoul dbe 75% of normal value if after the year 2037
+          if(year > 2037) {
+            socialSecurity *= 0.75;
+          }
         }
 
         //control how often we plot our data.  Doing it every year slows down the animation
@@ -227,10 +231,6 @@ var RetirementCalc = (function() {
         
         //increase social security by inflation
         socialSecurity *= (1 + self.userData.get("inflation")/100);
-        //in 2037, we expect social security to decrease by 75%
-        if(year === 2037) {
-          socialSecurity *= 0.75;
-        }
 
         age++;
         year++;
@@ -321,6 +321,8 @@ function resetFormValues(userData, field) {
 
 function fillForm(userData) {
   $("#retirementAmount").text(moneyFormat(userData.getRetirementTotal().reverse()[0]));
+  $("#incomeAtRetirement").text(moneyFormat(userData.getFinalIncome()));
+  $("#incomeAfterRetirement").text(moneyFormat(userData.getInitialRetirementIncome()));
 }
 
 //once our page is loaded
@@ -333,6 +335,7 @@ $(document).ready(function() {
     userData
   );
   initialize(userData, rc);
+  fillForm(userData);
 
   rc.defineLineChart();
 
