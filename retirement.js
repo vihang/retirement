@@ -196,7 +196,7 @@ var RetirementCalc = (function() {
       var ageLabel;
       var goalIncome = 0;
       var socialSecurity = 0;
-
+      var year = new Date().getFullYear();
 
       _(retirementAmounts).forEach(function(n){
         ageLabel = (age%5 === 0) ? ("age: " + age) : "";
@@ -214,6 +214,7 @@ var RetirementCalc = (function() {
           socialSecurity = self.userData.getSocialSecurity();
         }
 
+        //control how often we plot our data.  Doing it every year slows down the animation
         if(age%2 === 0) {
           lineChartData.push({
             //figure out SSN rate
@@ -224,8 +225,15 @@ var RetirementCalc = (function() {
           });
         }
         
+        //increase social security by inflation
         socialSecurity *= (1 + self.userData.get("inflation")/100);
+        //in 2037, we expect social security to decrease by 75%
+        if(year === 2037) {
+          socialSecurity *= 0.75;
+        }
+
         age++;
+        year++;
       }).value();//end forEach
       return lineChartData;
     },
