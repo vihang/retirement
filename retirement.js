@@ -96,10 +96,10 @@ var UserData = (function(){
         }
 
         retirementTotal *= (1 + this.get("rateAfter")/100);
-        retirementTotal -= retirementIncome;
+        retirementTotal -= (retirementIncome - socialSecurity);
         retirementIncome *= (1 + this.get("inflation")/100);
         retirementTotal = (retirementTotal < 0) ? 0 : retirementTotal;
-        retirementBalance.push(retirementTotal + socialSecurity);
+        retirementBalance.push(retirementTotal);
 
         //increase social security by inflation
         socialSecurity *= (1 + this.get("inflation")/100);
