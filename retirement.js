@@ -11,7 +11,8 @@ var UserData = (function(){
       "incomeRequired" : 85,
       "rateBefore" : 7,
       "rateAfter" : 4,
-      "inflation" : 2
+      "inflation" : 2,
+      "includeSS" : 1
     };
     this.data = _.clone(this.defaults);
   };
@@ -49,7 +50,7 @@ var UserData = (function(){
     },
     //get the total cost of our retirement, compounded annually
     getRetirementTotal: function() {
-      var retirement = this.get("currentRetirement");
+      var retirement = toFloat(this.get("currentRetirement"));
       var plotPoints = [];
       var self = this;
       _(this.getAnnualContributions()).forEach(function(contribution){
@@ -86,14 +87,34 @@ var UserData = (function(){
       return retirementBalance;
     },
     getSocialSecurity: function(){
-      //need to derived ss amount;
+      //need to derive ss amount;
+      //TODO get the age of retirement. if under 66, 75%
       var socialSecurity = 0;
-      return socialSecurity;
+      var currentYearMax = 117000;
+      var monthlyAverage;
+
+      if(this.getFinalIncome() >= currentYearMax) {
+        monthlyAverage = currentYearMax/12;
+        // 90% of first 826
+        // 32% of 826 through 4980
+        // 15% above 4980
+        monthlyAverage -= 5806;
+        monthlyAverage *= 0.15;
+        monthlyAverage += (5806 * 0.32);
+        monthlyAverage += (826 * 0.9);
+        socialSecurity = monthlyAverage;
+      }
+      if(toFloat(this.get("includeSS")) == 0) {
+        console.log("true");
+        socialSecurity = 0;
+      }
+      return socialSecurity * 12;
     }
   }
   return constructor;
 })();
 
+//retirement calculator class
 var RetirementCalc = (function() {
   var constructor = function(lineChart, userData) {
     this.lineChart = lineChart;
@@ -115,21 +136,22 @@ var RetirementCalc = (function() {
           animationSteps: 1,
           pointDot: false,
           scaleShowVerticalLines: false,
-          showTooltips: false
+          showTooltips: false,
+          animation: true
       };
       var data = {
         labels:[],
         datasets: [
-          // {
-          //   label: "Goal income",
-          //   fillColor: "rgba(220,220,220,0.2)",
-          //   strokeColor: "rgba(220,220,220,1)",
-          //   pointColor: "rgba(220,220,220,1)",
-          //   pointStrokeColor: "#fff",
-          //   pointHighlightFill: "#fff",
-          //   pointHighlightStroke: "rgba(220,220,220,1)",
-          //   data: []
-          // },
+          {
+            label: "Social Security",
+            fillColor: "rgba(220,220,220,0.2)",
+            strokeColor: "rgba(220,220,220,1)",
+            pointColor: "rgba(220,220,220,1)",
+            pointStrokeColor: "#fff",
+            pointHighlightFill: "#fff",
+            pointHighlightStroke: "rgba(220,220,220,1)",
+            data: []
+          },
           {
             label: "Retirement Savings",
             fillColor: "rgba(151,187,205,0.2)",
@@ -158,7 +180,7 @@ var RetirementCalc = (function() {
       var self = this;
       //for each item in our Line Chart Data, update our line chart object
       _.each(this.getLineChartData(), function(row){
-        self.lineChart.addData([row.balance, row.goal], row.age);
+        self.lineChart.addData([row.ss, row.balance, row.goal], row.age);
       });
     },
     getLineChartData: function(){
@@ -168,6 +190,8 @@ var RetirementCalc = (function() {
       var self = this;
       var ageLabel;
       var goalIncome = 0;
+      var socialSecurity = 0;
+
 
       _(retirementAmounts).forEach(function(n){
         ageLabel = (age%5 === 0) ? ("age: " + age) : "";
@@ -179,26 +203,34 @@ var RetirementCalc = (function() {
         //adjust the desired income for inflation
         goalIncome *= (1 + self.userData.get("inflation")/100);
 
-        if(age%5 === 0) {
+        if(age < self.userData.get("retirementAge")) {
+          socialSecurity = 0;
+        } else if(age === self.userData.get("retirementAge")) {
+          socialSecurity = self.userData.getSocialSecurity();
+        }
+
+        if(age%2 === 0) {
           lineChartData.push({
             //figure out SSN rate
-            balance: Math.round((n - (self.userData.getSocialSecurity() * self.userData.get("inflation")/100))),
+            ss: Math.round(socialSecurity),
+            balance: Math.round(n + socialSecurity),
             goal: Math.round(goalIncome),
             age: ageLabel
           });
         }
         
+        socialSecurity *= (1 + self.userData.get("inflation")/100);
         age++;
       }).value();//end forEach
-
       return lineChartData;
     },
     updateLineChart: function(){
       this.lineChart.options.animationSteps = 30;
       row = this.getLineChartData();
       for(var i=0; i < row.length; i++){
-        this.lineChart.datasets[0].points[i].value = row[i].balance;
-        this.lineChart.datasets[1].points[i].value = row[i].goal;
+        this.lineChart.datasets[0].points[i].value = row[i].ss;
+        this.lineChart.datasets[1].points[i].value = row[i].balance;
+        this.lineChart.datasets[2].points[i].value = row[i].goal;
         this.lineChart.update();
       }
     }
@@ -227,8 +259,9 @@ function isThereAChange(userData) {
       "incomeRequired",
       "rateBefore",
       "rateAfter",
-      "inflation"
-      ]
+      "inflation",
+      "includeSS"
+    ]
   return _.any(types, function(type) {
     return toFloat(document.retirementInputs[type].value) !== userData.get(type);
   });
@@ -236,6 +269,7 @@ function isThereAChange(userData) {
 
 //set the data in our userData object to match the form values
 function updateUserData(userData, field) {
+  console.log("field is: " + field);
   userData.set(field, document.retirementInputs[field].value);
 }
 
@@ -271,6 +305,10 @@ function resetFormValues(userData) {
   }
 }
 
+function fillForm(userData) {
+  $("#retirementAmount").text(moneyFormat(userData.getRetirementTotal().reverse()[0]));
+}
+
 //once our page is loaded
 $(document).ready(function() {
   //our user's data
@@ -287,6 +325,8 @@ $(document).ready(function() {
   $(":input").blur(function(element){
     if(isThereAChange(userData)){
       updateUserData(userData, element.currentTarget.attributes.name.nodeValue);
+
+      fillForm(userData);
       rc.updateLineChart();
     }
   });

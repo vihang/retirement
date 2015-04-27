@@ -24,6 +24,12 @@
 			<label for="currentRetirement">Current retirement savings:</label>
 			<input type="text" name="currentRetirement" id="currentRetirement">
 
+			<p>Include Social Security?</p>
+			<input type="radio" id="includeSS_yes" name="includeSS" value="1" checked>
+			<label for="includeSS_yes" id="label_includeSS_yes">Yes</label>
+			<input type="radio" id="includeSS_no" name="includeSS" value="0">
+			<label for="includeSS_no" id="label_includeSS_no">No</label>
+
 			<label for="expectedIncrease">Expected income increase:</label>
 			<input type="text" name="expectedIncrease" id="expectedIncrease">
 
@@ -44,6 +50,7 @@
 	</div>
 	<div id="results" >
 		<canvas id="lineChart" width="750" height="400"></canvas>
+		<p class="lead">You will have <span class="bolded"  id="retirementAmount"></span> at the age of retirement </p>
 	</div>
 </div>
 </body>
