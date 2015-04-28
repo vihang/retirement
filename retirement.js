@@ -205,6 +205,22 @@ var RetirementCalc = (function() {
         self.lineChart.addData([row.balance, row.goal], row.age);
       });
     },
+    removeLineChartData: function(){
+      
+      var self = this;
+      this.lineChart.options.animationSteps = 1;
+
+      //remove the data from the previous query
+      var targetLength = this.lineChart.datasets[0].points.length;
+
+      for(var i = 0; i < targetLength;i++){
+         self.lineChart.removeData();
+      }
+      _.each(this.getLineChartData(), function(row){
+        self.lineChart.addData([row.balance, row.goal], row.age);
+      });
+
+    },
     getLineChartData: function(){
       var lineChartData = [];
       var age = this.userData.get("currentAge");
@@ -240,18 +256,21 @@ var RetirementCalc = (function() {
           //we have to use a boolean, otherwise it would trigger multiple times
           retireAgeCheck = false;
         }
-
         age++;
       }).value();//end forEach
       return lineChartData;
     },
     updateLineChart: function(){
-      this.lineChart.options.animationSteps = 30;
-      row = this.getLineChartData();
-      for(var i=0; i < row.length; i++){
-        this.lineChart.datasets[0].points[i].value = row[i].balance;
-        this.lineChart.datasets[1].points[i].value = row[i].goal;
-        this.lineChart.update();
+      if(typeof this.lineChart.datasets[0].points[0] === 'undefined'){
+        this.defineLineChart(); 
+      } else {
+        this.lineChart.options.animationSteps = 30;
+        row = this.getLineChartData();
+        for(var i=0; i < row.length; i++){
+          this.lineChart.datasets[0].points[i].value = row[i].balance;
+          this.lineChart.datasets[1].points[i].value = row[i].goal;
+          this.lineChart.update();
+        }
       }
     }
   }
@@ -264,6 +283,9 @@ function initialize(userData, rc) {
 
   _.each(userData.defaults, function(key, val){
     document.retirementInputs[val].value = userData.defaults[val];
+    if($(retirementInputs[val]).hasClass('percent')) {
+      document.retirementInputs[val].value = document.retirementInputs[val].value + "%";
+    }
   });
 
 }
@@ -289,12 +311,20 @@ function isThereAChange(userData) {
 //set the data in our userData object to match the form values
 function updateUserData(userData, field) {
   userData.set(field, toFloat(document.retirementInputs[field].value));
+  logicCheck(userData);
 }
 
 function toFloat(element) {
   //we divide by 1 to ensure that it is a number
   //otherwise, it returns NaN
   return element/1;
+}
+
+//we need to check certain logic to make sure invalid numbers aren't input
+function logicCheck(userData) {
+  if(document.retirementInputs.currentAge.value > userData.get("retirementAge")) {
+    document.retirementInputs.currentAge.value = userData.get("retirementAge");
+  }
 }
 
 //set our values to string and add commas and a dollar sign
@@ -336,6 +366,10 @@ function fillRetireAge(age) {
   $("#retireAge").text(age);
 }
 
+function appendPercent(element) {
+  $(element).val($(element).val() + "%");
+}
+
 //once our page is loaded
 $(document).ready(function() {
   //our user's data
@@ -350,20 +384,37 @@ $(document).ready(function() {
 
   rc.defineLineChart();
 
+  $(".percent").click(function(element){
+    $(element.currentTarget).val($(element.currentTarget).val().slice(0, -1));
+  }).blur(function(element){
+    appendPercent(element.currentTarget);
+  });
+
+  //if they make a change to their age, we need to adjust the axis of the chart
   $(":input").change(function(element){
+    var checkToUpdate = true;
+    if(element.currentTarget.attributes.name.nodeValue == 'currentAge') {
+      //we need to update the data for current age before we recalculate
+      updateUserData(userData, element.currentTarget.attributes.name.nodeValue);
+      rc.removeLineChartData();
+      checkToUpdate = false;
+    }
+
+    //the axis is uneffected by other fields
     if(isThereAChange(userData)){
       resetFormValues(userData, element.currentTarget.attributes.name.nodeValue);
       updateUserData(userData, element.currentTarget.attributes.name.nodeValue);
       fillForm(userData);
-      rc.updateLineChart();
+
+      //if the current age field was changed, then don't update the chart
+      //since resetting the data does that for us
+      if(checkToUpdate){
+        rc.updateLineChart();
+      }
     }
   });
 });
 
-
-/* TODO
-
-*/
 
 
 

@@ -13,16 +13,16 @@
 			<input type="text" name="currentAge" id="currentAge" value="30" min="18" max="100">
 
 			<label for="retirementAge">Age of retirement:</label>
-			<input type="text" name="retirementAge" id="retirementAge" value="65" min="55" max="100">
+			<input type="text" name="retirementAge" id="retirementAge" value="67" min="55" max="100">
 
 			<label for="annualIncome">Annual Income:</label>
-			<input type="text" name="annualIncome" id="annualIncome">
+			<input type="text" name="annualIncome" id="annualIncome" value="70000">
 
-			<label for="retirementSavings">Retirement Savings:</label>
-			<input type="text" name="retirementSavings" id="retirementSavings">
+			<label for="retirementSavings">Contributions to retirement:</label>
+			<input type="text" class="percent" name="retirementSavings" id="retirementSavings" value="15">
 
 			<label for="currentRetirement">Current retirement savings:</label>
-			<input type="text" name="currentRetirement" id="currentRetirement">
+			<input type="text" name="currentRetirement" id="currentRetirement" value="0">
 
 			<p>Include Social Security?</p>
 			<input type="radio" id="includeSS_yes" name="includeSS" value="1" checked>
@@ -31,19 +31,19 @@
 			<label for="includeSS_no" id="label_includeSS_no">No</label>
 
 			<label for="expectedIncrease">Expected income increase:</label>
-			<input type="text" name="expectedIncrease" id="expectedIncrease">
+			<input type="text" name="expectedIncrease" class="percent" id="expectedIncrease" value="2">
 
 			<label for="incomeRequired">Income required at retirement:</label>
-			<input type="text" name="incomeRequired" id="incomeRequired">
+			<input type="text" name="incomeRequired" class="percent" id="incomeRequired" value="85">
 
 			<label for="rateBefore">Rate of return before retirement:</label>
-			<input type="text" name="rateBefore" id="rateBefore">
+			<input type="text" name="rateBefore" class="percent" id="rateBefore" value="7">
 
 			<label for="rateAfter">Rate of return after retirement:</label>
-			<input type="text" name="rateAfter" id="rateAfter">
+			<input type="text" name="rateAfter" class="percent" id="rateAfter" value="4">
 
 			<label for="inflation">Expected rate of inflation:</label>
-			<input type="text" name="inflation" id="inflation">
+			<input type="text" name="inflation" class="percent" id="inflation" value="2">
 
 		</form>
 		<p class="lead red hidden" id="alertText">All fields must be numbers</p>
