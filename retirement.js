@@ -340,7 +340,7 @@ $(document).ready(function() {
 
   rc.defineLineChart();
 
-  $(":input").blur(function(element){
+  $(":input").change(function(element){
     if(isThereAChange(userData)){
       resetFormValues(userData, element.currentTarget.attributes.name.nodeValue);
       updateUserData(userData, element.currentTarget.attributes.name.nodeValue);

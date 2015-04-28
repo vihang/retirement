@@ -1,10 +1,10 @@
 describe("UserData", function() {
   var data;
-  var mortgageCalc;
+  var retirementCalc;
 
   beforeEach(function() { 
     data = new UserData();
-    mortgageCalc = new MortgageCalc(
+    retirementCalc = new RetirementCalc(
       $("#lineChart").get(0).getContext("2d"),
       data
     );
@@ -34,13 +34,13 @@ describe("UserData", function() {
 
 
 //MortgageCalc class
-describe("MortgageCalc", function() {
+describe("RetirementCalc", function() {
   var data;
-  var mortgageCalc;
+  var retirementCalc;
 
   beforeEach(function() { 
     data = new UserData();
-    mortgageCalc = new MortgageCalc(
+    retirementCalc = new RetirementCalc(
       $("#lineChart").get(0).getContext("2d"),
       data
     );
@@ -48,12 +48,12 @@ describe("MortgageCalc", function() {
 
   describe("#defineLineChart", function(){
     it("should call generateLineChart", function(){
-      spyOn(mortgageCalc, "generateLineChart");
+      spyOn(retirementCalc, "generateLineChart");
       spyOn(_, "each").and.callFake(function(){
         return;
       });
-      mortgageCalc.defineLineChart();
-      expect(mortgageCalc.generateLineChart).toHaveBeenCalled();
+      retirementCalc.defineLineChart();
+      expect(retirementCalc.generateLineChart).toHaveBeenCalled();
     });
   });
 
@@ -63,23 +63,16 @@ describe("MortgageCalc", function() {
       data.set("intRate", 4);
       spyOn(data, "getPrincipalInterest").and.returnValue(1295);
     });
-
-    // it("should validate with preset data sets", function(){
-    //   var dataTest = [
-    //     {}
-    //   ];
-    //   expect(mortgageCalc.getLineChartData()).toEqual(dataTest);
-    // });
   });
 }); 
 
 describe("Form Methods", function() {
   var data;
-  var mortgageCalc;
+  var retirementCalc;
 
   beforeEach(function() { 
     data = new UserData();
-    mortgageCalc = new MortgageCalc(
+    retirementCalc = new RetirementCalc(
       $("#lineChart").get(0).getContext("2d"),
       data
     );
