@@ -140,7 +140,6 @@ var UserData = (function(){
       if(this.get("retirementAge") < 66) {
         socialSecurity *= 0.75;
       }
-      console.log(socialSecurity);
       return socialSecurity;
     }
   }

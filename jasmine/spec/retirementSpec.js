@@ -85,6 +85,91 @@ describe("UserData", function() {
       });
     });
   });
+
+  describe("#getSocialSecurity", function(){
+    describe("when social security is not included", function(){
+      beforeEach(function(){
+        var params = {
+          'includeSS' : 0,
+          'retirementAge' : 66
+        }
+        spyOn(data, 'get').and.callFake(function(dataParams){
+          return parseFloat(params[dataParams]);
+        });
+        spyOn(data, "getFinalIncome").and.returnValue(120000);
+      });
+      it("returns 0", function(){
+        expect(data.getSocialSecurity()).toEqual(0);
+      });
+    });
+    describe("when social security is included", function(){
+      describe("when income is over maximum", function(){
+        describe("when retirement age is over 66", function(){
+          beforeEach(function(){
+            var params = {
+              'includeSS' : 1,
+              'retirementAge' : 67
+            }
+            spyOn(data, 'get').and.callFake(function(dataParams){
+              return parseFloat(params[dataParams]);
+            });
+            spyOn(data, "getFinalIncome").and.returnValue(120000);
+          });
+          it("returns 33458.159999999996", function(){
+            expect(data.getSocialSecurity()).toEqual(33458.159999999996);
+          });
+        });
+        describe("when retirement age is under 66", function(){
+          beforeEach(function(){
+            var params = {
+              'includeSS' : 1,
+              'retirementAge' : 65
+            }
+            spyOn(data, 'get').and.callFake(function(dataParams){
+              return parseFloat(params[dataParams]);
+            });
+            spyOn(data, "getFinalIncome").and.returnValue(120000);
+          });
+          it("returns 25093.619999999995", function(){
+            expect(data.getSocialSecurity()).toEqual(25093.619999999995);
+          });
+        });
+      }); //end for over maximum
+      //if the user makes under the maximum
+      describe("when income is under maximum", function(){
+        describe("when retirement age is over 66", function(){
+          beforeEach(function(){
+            var params = {
+              'includeSS' : 1,
+              'retirementAge' : 67
+            }
+            spyOn(data, 'get').and.callFake(function(dataParams){
+              return parseFloat(params[dataParams]);
+            });
+            spyOn(data, "getFinalIncome").and.returnValue(59000);
+          });
+          it("returns 24628.96", function(){
+            expect(data.getSocialSecurity()).toEqual(24628.96);
+          });
+        });
+        describe("when retirement age is under 66", function(){
+          beforeEach(function(){
+            var params = {
+              'includeSS' : 1,
+              'retirementAge' : 65
+            }
+            spyOn(data, 'get').and.callFake(function(dataParams){
+              return parseFloat(params[dataParams]);
+            });
+            spyOn(data, "getFinalIncome").and.returnValue(59000);
+          });
+          it("returns 18471.72", function(){
+            expect(data.getSocialSecurity()).toEqual(18471.72);
+          });
+        });
+      });
+    });
+  });
 });
 
 
@@ -119,6 +204,8 @@ describe("RetirementCalc", function() {
   });
 }); 
 
+
+//form methods
 describe("Form Methods", function() {
   var data;
   var retirementCalc;
