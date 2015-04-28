@@ -13,8 +13,8 @@ describe("UserData", function() {
 
   describe("#get", function(){
     it("should return the default value if no number is provided", function(){
-      data.set("intRate", "test");
-      expect(data.get("intRate")).toEqual(4);
+      data.set("currentAge", "test");
+      expect(data.get("currentAge")).toEqual(30);
     });
   });
 
@@ -30,10 +30,65 @@ describe("UserData", function() {
       });
     })
   });
+
+  describe("derived methods", function(){
+    //we wrap all of these in one describe block so we can use some default values
+    beforeEach(function(){
+      var params = {
+        'retirementAge' : 33,
+        'currentAge' : 30,
+        "expectedIncrease": 2,
+        'annualIncome' : 70000,
+        "retirementSavings" : 15,
+        "rateBefore" : 7,
+        "incomeRequired" : 85,
+        "currentRetirement" : 0
+      }
+      spyOn(data, 'get').and.callFake(function(dataParams){
+        return parseFloat(params[dataParams]);
+      });
+    });
+    describe("#getAnnualIncome", function(){
+      it("returns 70k, 71.4k and 72828 on 3 years of data", function(){
+        var testArray = [70000, 71400, 72828];
+        expect(data.getAnnualIncome()).toEqual(testArray);
+      });
+    });
+    describe("#getAnnualContributions", function(){
+      it("returns 10500, 10710 and 10924.199999999999 on 3 years of data", function(){
+        var testArray = [10500, 10710, 10924.199999999999];
+        expect(data.getAnnualContributions()).toEqual(testArray);
+      });
+    });
+    describe("#getRetirementTotal", function(){
+      it("returns 10500, 21945 and 34405.35 on 3 years of data", function(){
+        var testArray = [10500, 21945, 34405.35];
+        expect(data.getRetirementTotal()).toEqual(testArray);
+      });
+    });
+    describe("#getFinalIncome", function(){
+      it("returns 72828", function(){
+        expect(data.getFinalIncome()).toEqual(72828);
+      });
+    });
+    describe("#getInitialRetirementIncome", function(){
+      it("returns 61903.799999999996", function(){
+        expect(data.getInitialRetirementIncome()).toEqual(61903.799999999996);
+      });
+    });
+    describe("#getFullRetirementBalances", function(){
+      it("returns an array with 80 items", function(){
+        expect(data.getFullRetirementBalances().length).toEqual(80);
+      });
+      it("returns the same values as getRetirementTotal() for the first 3 items", function(){
+        expect(data.getFullRetirementBalances().slice(0, 3)).toEqual(data.getRetirementTotal());
+      });
+    });
+  });
 });
 
 
-//MortgageCalc class
+//RetirementCalc class
 describe("RetirementCalc", function() {
   var data;
   var retirementCalc;
@@ -59,9 +114,7 @@ describe("RetirementCalc", function() {
 
   describe("#getLineChartData", function(){
     beforeEach(function(){
-      data.set("mortgageAmount", 200000);
-      data.set("intRate", 4);
-      spyOn(data, "getPrincipalInterest").and.returnValue(1295);
+      
     });
   });
 }); 
@@ -79,25 +132,27 @@ describe("Form Methods", function() {
   });
 
 
-  describe("#fillValues", function(){
-    var userData;
-    var defaults;
-    beforeEach(function() {
-      userData = new UserData();
-      spyOn(userData, 'set');
-      defaults = {
-        "interest" : '4',
-        "annualIncome" : '50000',
-        "monthlyPayment" : '1500',
-        "downPayment" : '10000',
-        "propertyTaxes" : '1.2',
-        "homeInsurance" : '800',
-        "hoaFees" : '0',
-        "monthlyDebt" : '0',
-        "loanTerm" : '360'
-      };
-    });
-  });
+  // describe("#fillValues", function(){
+  //   var userData;
+  //   var defaults;
+  //   beforeEach(function() {
+  //     userData = new UserData();
+  //     spyOn(userData, 'set');
+  //     defaults = {
+  //       "currentAge" : 30,
+  //       "retirementAge" : 67,
+  //       "annualIncome" : 70000,
+  //       "retirementSavings" : 15,
+  //       "currentRetirement" : 0,
+  //       "expectedIncrease": 2,
+  //       "incomeRequired" : 85,
+  //       "rateBefore" : 7,
+  //       "rateAfter" : 4,
+  //       "inflation" : 2,
+  //       "includeSS" : 1
+  //     };
+  //   });
+  // });
 
 
   describe("#moneyFormat", function(){
