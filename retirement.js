@@ -213,6 +213,7 @@ var RetirementCalc = (function() {
       var ageLabel;
       var goalIncome = 0;
       var socialSecurity = 0;
+      var retireAgeCheck = true;
 
       _(retirementAmounts).forEach(function(n){
         ageLabel = (age%5 === 0) ? ("age: " + age) : "";
@@ -232,6 +233,12 @@ var RetirementCalc = (function() {
             goal: Math.round(goalIncome),
             age: ageLabel
           });
+        }
+        //if the balance falls to 0, post the age the funds run out
+        if(n <= 0 && retireAgeCheck) {
+          fillRetireAge(age);
+          //we have to use a boolean, otherwise it would trigger multiple times
+          retireAgeCheck = false;
         }
 
         age++;
@@ -323,6 +330,10 @@ function fillForm(userData) {
   $("#incomeAtRetirement").text(moneyFormat(userData.getFinalIncome()));
   $("#incomeAfterRetirement").text(moneyFormat(userData.getInitialRetirementIncome()));
   $("#initialSS").text(moneyFormat(userData.getSocialSecurity()));
+}
+
+function fillRetireAge(age) {
+  $("#retireAge").text(age);
 }
 
 //once our page is loaded
