@@ -260,7 +260,6 @@ function initialize(userData, rc) {
     document.retirementInputs[val].value = userData.defaults[val];
   });
 
-  //rc.defineLineChart();
 }
 
 function isThereAChange(userData) {
@@ -354,13 +353,6 @@ $(document).ready(function() {
 
 /* TODO
 
-
-if after 2037 75% SS
-
-SS calc =
-90% of first 826
-32% of 826 through 4980
-15% above 4980
 */
 
 
