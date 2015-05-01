@@ -169,6 +169,7 @@ var RetirementCalc = (function() {
           pointDot: false,
           scaleShowVerticalLines: false,
           showTooltips: false,
+          scaleLabel: "<%= moneyFormat(value) %>",
           animation: true
       };
       var data = {
@@ -393,6 +394,11 @@ $(document).ready(function() {
   //if they make a change to their age, we need to adjust the axis of the chart
   $(":input").change(function(element){
     var checkToUpdate = true;
+    //if the element is a percent field and has a percent sign already, remove it
+    if(element.currentTarget.className === "percent" && element.currentTarget.value.slice(-1) === "%") {
+      $(element.currentTarget).val($(element.currentTarget).val().slice(0, -1));
+    }
+
     if(element.currentTarget.attributes.name.nodeValue == 'currentAge') {
       //we need to update the data for current age before we recalculate
       updateUserData(userData, element.currentTarget.attributes.name.nodeValue);
