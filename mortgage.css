@@ -1,16 +1,10 @@
 body {
-	background: #f6f6f6;
+	background: #fff;
 }
 
-#sidebar {
-	width: 30%;
-	float: left;
-	height: 100%;
-}
 
 #results {
 	width: 60%;
-	margin-left: 100px;
 	float: left;
 }
 
@@ -23,7 +17,6 @@ body {
 }
 
 .container {
-	width: 90%;
 	margin: auto;
 }
 .red {
@@ -31,22 +24,8 @@ body {
 	font-style: italic;
 }
 
-#retirementInputs {
-  color: rgb(88, 88, 88);
-  display: block;
-  font-family: SOG-Volkhov, serif;
-  font-size: 110%;
-  line-height: 25.7142868041992px;
-}
 
-#retirementInputs label {
-  color: rgb(10, 33, 38);
-  display: block;
-  font-family: SOG-Volkhov, serif;
-  font-size: 140%;
-  line-height: 50px;
-  margin-top: 0px;
-}
+
 input {
   background-color: #f6f6f6;
   border-bottom-color: rgb(221, 221, 221);
