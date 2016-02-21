@@ -1,7 +1,42 @@
-body {
-	background: #fff;
+body, html {
+    background: #fff;
+  margin: 0px; padding: 0px;
+  overflow: visible;
+
+  text-align: left;
+  font-family: "Helvetica Neue", "HelveticaNeue", Helvetica, Arial, sans-serif;
+  font-size: 15px;
+  color: #37404A;
 }
 
+
+.wrapper {
+    width:700px;
+    margin: 0 auto;
+}
+
+#block1 {
+    float:left;
+        margin: 0px 0px 10px
+
+}
+
+#block2
+{
+    float:right;
+    background-color: #F5F5F5;
+    margin: 10px 0px;
+    padding: 20px;
+    width: 180px;
+}
+
+.result-div p.title {
+    font-weight: bold; 
+}
+
+.result-div p {
+    margin-bottom: 0;
+}
 
 #results {
 	width: 60%;
