@@ -284,6 +284,7 @@ function initialize(userData, rc) {
 
   _.each(userData.defaults, function(key, val){
     userData.data[val] = GetUrlParam(val) || userData.defaults[val]
+    console.log(val, userData.data[val],GetUrlParam(val),  userData.defaults[val])
     document.retirementInputs[val].value = userData.data[val];
     if($(retirementInputs[val]).hasClass('percent')) {
       document.retirementInputs[val].value = document.retirementInputs[val].value + "%";
@@ -374,7 +375,7 @@ function appendPercent(element) {
 
 function GetUrlParam(name) { 
   var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
-  if (results && results.length>0) return results[1] || 0;
+  if (results && results.length>0) return Number(results[1]) || 0;
   return null
 }
 
