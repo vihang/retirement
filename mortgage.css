@@ -1,16 +1,45 @@
-body {
-	background: #f6f6f6;
+body, html {
+    background: #fff;
+  margin: 0px; padding: 0px;
+  overflow: visible;
+
+  text-align: left;
+  font-family: "Helvetica Neue", "HelveticaNeue", Helvetica, Arial, sans-serif;
+  font-size: 15px;
+  color: #37404A;
 }
 
-#sidebar {
-	width: 30%;
-	float: left;
-	height: 100%;
+
+.wrapper {
+    width:700px;
+    margin: 0 auto;
+}
+
+#block1 {
+    float:left;
+        margin: 0px 0px 10px
+
+}
+
+#block2
+{
+    float:right;
+    background-color: #F5F5F5;
+    margin: 10px 0px;
+    padding: 20px;
+    width: 180px;
+}
+
+.result-div p.title {
+    font-weight: bold; 
+}
+
+.result-div p {
+    margin-bottom: 0;
 }
 
 #results {
 	width: 60%;
-	margin-left: 100px;
 	float: left;
 }
 
@@ -23,7 +52,6 @@ body {
 }
 
 .container {
-	width: 90%;
 	margin: auto;
 }
 .red {
@@ -31,22 +59,8 @@ body {
 	font-style: italic;
 }
 
-#retirementInputs {
-  color: rgb(88, 88, 88);
-  display: block;
-  font-family: SOG-Volkhov, serif;
-  font-size: 110%;
-  line-height: 25.7142868041992px;
-}
 
-#retirementInputs label {
-  color: rgb(10, 33, 38);
-  display: block;
-  font-family: SOG-Volkhov, serif;
-  font-size: 140%;
-  line-height: 50px;
-  margin-top: 0px;
-}
+
 input {
   background-color: #f6f6f6;
   border-bottom-color: rgb(221, 221, 221);

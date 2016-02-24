@@ -7,54 +7,51 @@
 </head>
 <body>
 <div class="container">
-	<div id="sidebar">
 		<form id="retirementInputs" name="retirementInputs" action="#"> 
-			<label for="currentAge">Current Age:</label>
-			<input type="text" name="currentAge" id="currentAge" value="30" min="18" max="100">
-
-			<label for="retirementAge">Age of retirement:</label>
-			<input type="text" name="retirementAge" id="retirementAge" value="67" min="55" max="100">
-
-			<label for="annualIncome">Annual Income:</label>
-			<input type="text" name="annualIncome" id="annualIncome" value="70000">
-
-			<label for="retirementSavings">Contributions to retirement:</label>
-			<input type="text" class="percent" name="retirementSavings" id="retirementSavings" value="15">
-
-			<label for="currentRetirement">Current retirement savings:</label>
-			<input type="text" name="currentRetirement" id="currentRetirement" value="0">
-
-			<p>Include Social Security?</p>
-			<input type="radio" id="includeSS_yes" name="includeSS" value="1" checked>
-			<label for="includeSS_yes" id="label_includeSS_yes">Yes</label>
-			<input type="radio" id="includeSS_no" name="includeSS" value="0">
-			<label for="includeSS_no" id="label_includeSS_no">No</label>
-
-			<label for="expectedIncrease">Expected income increase:</label>
-			<input type="text" name="expectedIncrease" class="percent" id="expectedIncrease" value="2">
-
-			<label for="incomeRequired">Income required at retirement:</label>
-			<input type="text" name="incomeRequired" class="percent" id="incomeRequired" value="85">
-
-			<label for="rateBefore">Rate of return before retirement:</label>
-			<input type="text" name="rateBefore" class="percent" id="rateBefore" value="7">
-
-			<label for="rateAfter">Rate of return after retirement:</label>
-			<input type="text" name="rateAfter" class="percent" id="rateAfter" value="4">
-
-			<label for="inflation">Expected rate of inflation:</label>
-			<input type="text" name="inflation" class="percent" id="inflation" value="2">
+			<input type="hidden" name="currentAge" id="currentAge" value="30" min="18" max="100">
+			<input type="hidden" name="retirementAge" id="retirementAge" value="67" min="55" max="100">
+			<input type="hidden" name="annualIncome" id="annualIncome" value="70000">
+			<input type="hidden" class="percent" name="retirementSavings" id="retirementSavings" value="15">
+			<input type="hidden" name="currentRetirement" id="currentRetirement" value="0">
+			<input type="hidden" id="includeSS_yes" name="includeSS" value="1" checked>
+			<input type="hidden" id="includeSS_no" name="includeSS" value="0">
+			<input type="hidden" name="expectedIncrease" class="percent" id="expectedIncrease" value="2">
+			<input type="hidden" name="incomeRequired" class="percent" id="incomeRequired" value="85">
+			<input type="hidden" name="rateBefore" class="percent" id="rateBefore" value="7">
+			<input type="hidden" name="rateAfter" class="percent" id="rateAfter" value="4">
+			<input type="hidden" name="inflation" class="percent" id="inflation" value="2">
 
 		</form>
-		<p class="lead red hidden" id="alertText">All fields must be numbers</p>
-	</div>
 	<div id="results" >
-		<canvas id="lineChart" width="750" height="400"></canvas>
-		<p class="lead">You will have <span class="bolded"  id="retirementAmount"></span> at the age of retirement </p>
-		<p class="lead">Your estimated income at retirement will be <span class="bolded"  id="incomeAtRetirement"></span> </p>
-		<p class="lead">Your required income after retirement will be <span class="bolded"  id="incomeAfterRetirement"></span> </p>
-		<p class="lead">Your estimated initial social security income would be <span class="bolded"  id="initialSS"></span> </p>
-		<p class="lead">Retirement savings runs out at age <span class="bolded"  id="retireAge"></span> </p>
+	   <div class="wrapper">
+		 <div class="result-div" id="block1">
+                <div>
+					<p>You will have <span class="bolded"  id="retirementAmount"></span> at the age of retirement </p>
+                </div>
+                <div>
+					<p>Your estimated income at retirement will be <span class="bolded"  id="incomeAtRetirement"></span> </p>
+                </div>
+                  <div>
+					<p >Your required income after retirement will be <span class="bolded"  id="incomeAfterRetirement"></span> </p>
+                </div>
+                <div>
+					<p>Your estimated initial CPF income would be <span class="bolded"  id="initialSS"></span> </p>
+                </div>
+                <div>
+					<p>Retirement savings runs out at age <span class="bolded"  id="retireAge"></span> </p>
+                </div>
+            </div>
+                <div id="block2">
+                <p class="title">Start working on your retirement planning today!</p>
+                <p><a href="" id="" class="contact">Contact me</a></p>
+                </div>
+                                            <div class="border"></div>
+                <br/>__________________________________________________________________________________________<br/>
+
+                		<canvas id="lineChart" width="750" height="400"></canvas>
+
+          </div>
+
 
 	</div>
 </div>
