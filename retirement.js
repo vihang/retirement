@@ -177,9 +177,9 @@ var RetirementCalc = (function() {
         datasets: [
           {
             label: "Retirement Savings",
-            fillColor: "rgba(151,187,205,0.2)",
-            strokeColor: "rgba(151,187,205,1)",
-            pointColor: "rgba(151,187,205,1)",
+            fillColor: "rgba(175,235,139,0.2)",
+            strokeColor: "rgba(175,235,139,1)",
+            pointColor: "rgba(175,235,139,1)",
             pointStrokeColor: "#fff",
             pointHighlightFill: "#fff",
             pointHighlightStroke: "rgba(151,187,205,1)",
@@ -187,9 +187,9 @@ var RetirementCalc = (function() {
           },
           {
             label: "Goal Income",
-            fillColor: "rgba(175,235,139,0.2)",
-            strokeColor: "rgba(175,235,139,1)",
-            pointColor: "rgba(175,235,139,1)",
+            fillColor: "rgba(151,187,205,0.2)",
+            strokeColor: "rgba(151,187,205,1)",
+            pointColor: "rgba(151,187,205,1)",
             pointStrokeColor: "#fff",
             pointHighlightFill: "#fff",
             pointHighlightStroke: "rgba(175,235,139,1)",
