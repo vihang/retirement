@@ -20,7 +20,10 @@
 			<input type="hidden" name="rateBefore" class="percent" id="rateBefore" value="7">
 			<input type="hidden" name="rateAfter" class="percent" id="rateAfter" value="4">
 			<input type="hidden" name="inflation" class="percent" id="inflation" value="2">
-
+			<input type="hidden" name="pmt" id="pmt" value="3000">
+			<input type="hidden" name="liveExpectancy" id="liveExpectancy" value="83">
+			<input type="hidden" name="retirementSavingAmountMonthly" id="retirementSavingAmountMonthly" value="0">
+			<input type="hidden" name="compounding" id="compounding" value="4">
 		</form>
 	<div id="results" >
 	   <div class="wrapper">
@@ -36,6 +39,9 @@
                 </div>
                 <div>
 					<p>Retirement savings runs out at age <span class="bolded"  id="retireAge"></span> </p>
+                </div>
+                    <div>
+					<p>You need to save <span class="bolded"  id="savings"></span> monthly <br/>to receive <span class="bolded"  id="pmtv"></span> every month after retirement</p>
                 </div>
             </div>
                 <div id="block2">
