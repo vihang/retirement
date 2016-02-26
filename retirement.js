@@ -7,14 +7,14 @@ var UserData = (function(){
 			"annualIncome" : 70000,
 			"retirementSavings" : 15,
 			"currentRetirement" : 0,
-			"expectedIncrease": 2,
+			"expectedIncrease": 0,
 			"incomeRequired" : 85,
 			"rateBefore" : 7,
 			"rateAfter" : 4,
-			"inflation" : 2,
+			"inflation" : 0,
 			"includeSS" : 0,
 			"pmt": 10114,
-			"liveExpectancy": 83,
+			"liveExpectancy": 110,
 			"retirementSavingAmountMonthly":0,
 			"compounding":1
 		};
@@ -113,7 +113,7 @@ var UserData = (function(){
 	//PLAN we need to plot not only the growing balance, but the balance once withdrawals start
 		getFullRetirementBalancesPlan: function(){
 			var retirementBalance = this.getRetirementTotalPlan();
-			var retirementIncome = this.get("pmt") * this.get("compounding");
+			var retirementIncome = this.getPMT();
 			var retirementTotal = _.clone(retirementBalance).reverse()[0];
 			var age = this.get("currentAge");
 			var year = new Date().getFullYear();
@@ -207,10 +207,17 @@ var UserData = (function(){
 			}
 			return socialSecurity;
 		},
+		getPMT: function() {
+					return this.get("pmt") * (13 - this.get("compounding"));
+
+		},
+		getNPER: function() {
+				  return (this.get("liveExpectancy") - this.get("retirementAge")) * this.get("compounding")
+		},
 		getPV: function() {
 					var rate = this.get("rateBefore");
-					var nper = (this.get("liveExpectancy") - this.get("retirementAge")) * 12
-					var pmt = this.get("pmt") * (13 - this.get("compounding"));
+					var nper = this.getNPER();
+					var pmt = this.getPMT();
 					var fv = 0;
 					var type = 0;
 					if (!fv) fv = 0;
@@ -219,6 +226,7 @@ var UserData = (function(){
 					var erate = rate/(this.get("compounding")*100)
 					var pvif = Math.pow(1 + erate, nper);
 					var pv = ((pmt /  (erate / (pvif - 1))) - fv) / pvif
+					console.log(rate, nper, pmt, rate, pvif, pv)
 					if (type == 1) {
 						pv *= (1 + rate);
 					};
