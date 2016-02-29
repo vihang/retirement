@@ -1,4 +1,7 @@
+//PROBLEM: the "current" graph also takes into account how much people want in retirement...
+
 //Our user data class
+// "incomeRequired" : 85,
 var UserData = (function(){
 	var constructor = function(){
 		this.defaults = {
@@ -8,15 +11,15 @@ var UserData = (function(){
 			"retirementSavings" : 15,
 			"currentRetirement" : 0,
 			"expectedIncrease": 0,
-			"incomeRequired" : 85,
 			"rateBefore" : 7,
 			"rateAfter" : 4,
-			"inflation" : 0,
+			"inflation" : 4,
 			"includeSS" : 0,
-			"pmt": 10114,
+			"pmt": 3000,
 			"liveExpectancy": 110,
 			"retirementSavingAmountMonthly":0,
-			"compounding":1
+			"compounding":1,
+			"monthlyExpenditure": 3000,
 		};
 		this.data = _.clone(this.defaults);
 	};
@@ -86,18 +89,26 @@ var UserData = (function(){
 			return plotPoints;
 		},
 				//get the total cost of our plan retirement, compounded annually
-		getRetirementTotalPlan: function() {
+		getRetirementTotalPlan: function() { 
+		// THIS DOES EXACTLY THE SAME AS getRetirementTotal (if compounding = 1) - WRONG APPROACH
+		// since we're doing the reverse of what he does we should start with pmt and not currentRetirement!!!
+		////////////////////////////////////////////////////
+		//	var getter = this.get("pmt")
+		//	var plotPoints = [];
+		//	var self = this;
+		////////////////////////////////////////////////////
 			var retirement = this.get("currentRetirement");
 			var plotPoints = [];
 			var self = this;
+			var savings = this.getAnnualSavings()
 
 			_(this.getAnnualSavings()).forEach(function(contribution){
-				var erate = 1 + (self.get("rateBefore")/(100*self.get("compounding")))
-				var crate = Math.pow(erate, self.get("compounding"))
-				retirement *= crate;
-				retirement += contribution;
+				var erate = 1 + (self.get("rateBefore")/(100*self.get("compounding"))) //VIHANG: same as above
+				var crate = Math.pow(erate, self.get("compounding")) //VIHANG: same as above
+				retirement *= crate; // pretty sure compounding already happened
+				retirement += contribution //VIHANG: same as above
 				//create an array with our growing balance for the line chart
-				plotPoints.push(retirement);
+			plotPoints.push(retirement);
 			}).value();
 			return plotPoints;
 		},
@@ -107,14 +118,15 @@ var UserData = (function(){
 			return _.clone(this.getAnnualIncome()).reverse()[0];
 		},
 		getInitialRetirementIncome: function(){
-			return this.getFinalIncome() * (this.get("incomeRequired")/100);
+			return 12*this.get("monthlyExpenditure");
 		},
 
 	//PLAN we need to plot not only the growing balance, but the balance once withdrawals start
+	// This function is wrong. We know the person wants to spend X per month until death; we have PV and ideal age expectancy
 		getFullRetirementBalancesPlan: function(){
 			var retirementBalance = this.getRetirementTotalPlan();
 			var retirementIncome = this.getPMT();
-			var retirementTotal = _.clone(retirementBalance).reverse()[0];
+			var retirementTotal = _.clone(retirementBalance).reverse()[0]; // retirementBalance should NOT be the same for both...
 			var age = this.get("currentAge");
 			var year = new Date().getFullYear();
 			var socialSecurity = this.getSocialSecurity();;
@@ -213,9 +225,10 @@ var UserData = (function(){
 		},
 		getNPER: function() {
 				  return (this.get("liveExpectancy") - this.get("retirementAge")) * this.get("compounding")
+
 		},
 		getPV: function() {
-					var rate = this.get("rateBefore");
+					var rate = this.get("rateAfter");
 					var nper = this.getNPER();
 					var pmt = this.getPMT();
 					var fv = 0;
@@ -291,8 +304,8 @@ var RetirementCalc = (function() {
 				datasets: [
 					{
 						label: "Retirement Savings",
-						fillColor: "rgba(175,235,139,0.2)",
-						strokeColor: "rgba(175,235,139,1)",
+						fillColor: "rgba(255,0,0,0.3)",
+						strokeColor: "rgba(255,0,0,1)",
 						pointColor: "rgba(175,235,139,1)",
 						pointStrokeColor: "#fff",
 						pointHighlightFill: "#fff",
@@ -301,8 +314,8 @@ var RetirementCalc = (function() {
 					},
 										{
 					label: "Retirement Plan",
-						fillColor: "rgba(255,235,139,0.2)",
-						strokeColor: "rgba(255,235,139,1)",
+						fillColor: "rgba(0,255,0,0.3)",
+						strokeColor: "rgba(0,255,0,1)",
 						pointColor: "rgba(175,235,139,1)",
 						pointStrokeColor: "#fff",
 						pointHighlightFill: "#fff",
@@ -400,7 +413,7 @@ var RetirementCalc = (function() {
 				for(var i=0; i < row.length; i++){
 					this.lineChart.datasets[0].points[i].value = row[i].balance;
 					this.lineChart.datasets[1].points[i].value = row[i].plan;
-					this.lineChart.datasets[1].points[i].value = row[i].goal;
+					this.lineChart.datasets[2].points[i].value = row[i].goal;
 					this.lineChart.update();
 				}
 			}
@@ -424,7 +437,7 @@ function initialize(userData, rc) {
   				userData.data["retirementSavings"] = (userData.data["retirementSavingAmountMonthly"] * 1200) / userData.data["annualIncome"]
   }
 }
-
+			// "incomeRequired",
 function isThereAChange(userData) {
 	var types = ["currentAge",
 			"retirementAge",
@@ -432,11 +445,11 @@ function isThereAChange(userData) {
 			"retirementSavings",
 			"currentRetirement",
 			"expectedIncrease",
-			"incomeRequired",
 			"rateBefore",
 			"rateAfter",
 			"inflation",
-			"includeSS"
+			"includeSS",
+			"monthlyExpenditure",
 		]
 	return _.any(types, function(type) {
 		return toFloat(document.retirementInputs[type].value) !== userData.get(type);
@@ -497,6 +510,7 @@ function fillForm(userData) {
 	$("#initialSS").text(moneyFormat(userData.getSocialSecurity()));
 	$("#savings").text(moneyFormat(userData.getPeriodicSavings()));
 	$("#pmtv").text(moneyFormat(userData.get("pmt")));
+	$("#monthlyExpenditureShow").text(moneyFormat(userData.get("monthlyExpenditure")));
 }
 
 function fillRetireAge(age) {
@@ -520,6 +534,7 @@ function GetUrlParam(name) {
 $(document).ready(function() {
 	//our user's data
 	var userData = new UserData();
+	console.log(userData)
 	//instantiate our mortgage calculator
 	var rc = new RetirementCalc(
 		$("#lineChart").get(0).getContext("2d"),

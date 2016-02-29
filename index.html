@@ -6,6 +6,7 @@
 	<title>Retirement Savings</title>
 </head>
 <body>
+			<!-- <input type="hidden" name="incomeRequired" class="percent" id="incomeRequired" value="85"> -->
 <div class="container">
 		<form id="retirementInputs" name="retirementInputs" action="#"> 
 			<input type="hidden" name="currentAge" id="currentAge" value="30" min="18" max="100">
@@ -16,7 +17,6 @@
 			<input type="hidden" id="includeSS_yes" name="includeSS" value="1" checked>
 			<input type="hidden" id="includeSS_no" name="includeSS" value="0">
 			<input type="hidden" name="expectedIncrease" class="percent" id="expectedIncrease" value="2">
-			<input type="hidden" name="incomeRequired" class="percent" id="incomeRequired" value="85">
 			<input type="hidden" name="rateBefore" class="percent" id="rateBefore" value="7">
 			<input type="hidden" name="rateAfter" class="percent" id="rateAfter" value="4">
 			<input type="hidden" name="inflation" class="percent" id="inflation" value="2">
@@ -24,6 +24,7 @@
 			<input type="hidden" name="liveExpectancy" id="liveExpectancy" value="83">
 			<input type="hidden" name="retirementSavingAmountMonthly" id="retirementSavingAmountMonthly" value="0">
 			<input type="hidden" name="compounding" id="compounding" value="4">
+			<input type="hidden" name="monthlyExpenditure" id="monthlyExpenditure" value="3000">
 		</form>
 	<div id="results" >
 	   <div class="wrapper">
@@ -35,7 +36,7 @@
 					<p>Your estimated income at retirement will be <span class="bolded"  id="incomeAtRetirement"></span> </p>
                 </div>
                   <div>
-					<p >Your required income after retirement will be <span class="bolded"  id="incomeAfterRetirement"></span> </p>
+					<p >Your required income after retirement is <span class="bolded"  id="monthlyExpenditureShow"></span> </p>
                 </div>
                 <div>
 					<p>Your estimated initial CPF income would be <span class="bolded"  id="initialSS"></span> </p>
