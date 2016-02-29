@@ -510,7 +510,7 @@ function fillForm(userData) {
 	$("#initialSS").text(moneyFormat(userData.getSocialSecurity()));
 	$("#savings").text(moneyFormat(userData.getPeriodicSavings()));
 	$("#pmtv").text(moneyFormat(userData.get("pmt")));
-	$("#monthlyExpenditureShow").text(moneyFormat(userData.get("monthlyExpenditure")));
+	$("#idealTotalSavings").text(moneyFormat(userData.getPV()));
 }
 
 function fillRetireAge(age) {
