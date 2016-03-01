@@ -7,7 +7,7 @@ var UserData = (function(){
 		this.defaults = {
 			"currentAge" : 30,
 			"retirementAge" : 67,
-			"annualIncome" : 70000,
+			"monthlyIncome" : 4000,
 			"retirementSavings" : 15,
 			"currentRetirement" : 0,
 			"expectedIncrease": 0,
@@ -16,10 +16,11 @@ var UserData = (function(){
 			"inflation" : 4,
 			"includeSS" : 0,
 			"pmt": 3000,
-			"liveExpectancy": 110,
+			"liveExpectancy": 85,
 			"retirementSavingAmountMonthly":0,
 			"compounding":1,
 			"monthlyExpenditure": 3000,
+			"realLifeExpectancy": 86
 		};
 		this.data = _.clone(this.defaults);
 	};
@@ -39,7 +40,7 @@ var UserData = (function(){
 		getAnnualIncome: function(){
 			var yearsTilRetire = this.get("retirementAge") - this.get("currentAge");
 			var annualIncomeArray = [];
-			var income = this.get("annualIncome");
+			var income = this.get("monthlyIncome")*12;
 
 			for(var i = 0; i < yearsTilRetire; i++) {
 				if(i > 0) {
@@ -105,7 +106,7 @@ var UserData = (function(){
 			_(this.getAnnualSavings()).forEach(function(contribution){
 				var erate = 1 + (self.get("rateBefore")/(100*self.get("compounding"))) //VIHANG: same as above
 				var crate = Math.pow(erate, self.get("compounding")) //VIHANG: same as above
-				retirement *= crate; // pretty sure compounding already happened
+				retirement *= crate; // "double" compounding
 				retirement += contribution //VIHANG: same as above
 				//create an array with our growing balance for the line chart
 			plotPoints.push(retirement);
@@ -137,10 +138,10 @@ var UserData = (function(){
 				if(i ===0 && year > 2037) {
 					socialSecurity *= 0.75;
 				}
-
+				// inflation is pretty important to reduce savings accordingly
 				retirementTotal *= (1 + this.get("rateAfter")/100);
-				retirementTotal -= retirementIncome - socialSecurity;
-				retirementIncome *= (1 + this.get("inflation")/100);
+				retirementTotal -= retirementIncome; //- socialSecurity;
+			    // retirementIncome *= (1 + this.get("inflation")/100);
 				retirementTotal = (retirementTotal < 0) ? 0 : retirementTotal;
 				retirementBalance.push(retirementTotal);
 
@@ -224,7 +225,7 @@ var UserData = (function(){
 
 		},
 		getNPER: function() {
-				  return (this.get("liveExpectancy") - this.get("retirementAge")) * this.get("compounding")
+				  return (this.get("realLifeExpectancy") - this.get("retirementAge"))
 
 		},
 		getPV: function() {
@@ -235,11 +236,13 @@ var UserData = (function(){
 					var type = 0;
 					if (!fv) fv = 0;
 					if (!type) type = 0;
-					console
+					
+					var pv = pmt / ((rate / 100) / (1 - Math.pow(1+ (rate / 100), -nper)))
+					/*
 					var erate = rate/(this.get("compounding")*100)
 					var pvif = Math.pow(1 + erate, nper);
-					var pv = ((pmt /  (erate / (pvif - 1))) - fv) / pvif
-					console.log(rate, nper, pmt, rate, pvif, pv)
+					var pv = ((pmt /  (erate / (pvif - 1))) - fv) / pvif */
+					console.log(rate, nper, pmt, pv)
 					if (type == 1) {
 						pv *= (1 + rate);
 					};
@@ -248,13 +251,16 @@ var UserData = (function(){
 
 		getPeriodicSavings: function(){
 			 		var pv = this.getPV()
-			 		console.log("pv", pv)
-			 		var rate = this.get("rateBefore");
+			 		var rate = this.get("rateBefore"); //when both graphs earn at the same rate they overlap
 					var n = this.get("compounding");
 					var nper = this.get("retirementAge") - this.get("currentAge")
 					var nrate = (rate/100)/n
+					var pmt = pv / ((Math.pow(1+nrate,nper)-1)/nrate)
+					console.log("Periodic savings")
+					console.log(rate, nper, pmt, pv)
+					/*
 					var aprc = Math.pow(1 + nrate, n*nper);
-					var pmt = pv / ((aprc-1)/nrate)
+					var pmt = pv / ((aprc-1)/nrate)*/
 					return pmt;
 		}
 	}
@@ -322,7 +328,6 @@ var RetirementCalc = (function() {
 						pointHighlightStroke: "rgba(151,187,205,1)",
 						data: []
 					},
-
 					{
 						label: "Goal Income",
 						fillColor: "rgba(151,187,205,0.2)",
@@ -341,7 +346,7 @@ var RetirementCalc = (function() {
 			var self = this;
 			//for each item in our Line Chart Data, update our line chart object
 			_.each(this.getLineChartData(), function(row){
-				self.lineChart.addData([row.balance, row.plan,row.goal], row.age);
+				self.lineChart.addData([row.balance, row.plan, /*row.goal*/], row.age);
 			});
 		},
 		removeLineChartData: function(){
@@ -413,7 +418,7 @@ var RetirementCalc = (function() {
 				for(var i=0; i < row.length; i++){
 					this.lineChart.datasets[0].points[i].value = row[i].balance;
 					this.lineChart.datasets[1].points[i].value = row[i].plan;
-					this.lineChart.datasets[2].points[i].value = row[i].goal;
+					// this.lineChart.datasets[2].points[i].value = row[i].goal;
 					this.lineChart.update();
 				}
 			}
@@ -434,14 +439,14 @@ function initialize(userData, rc) {
 		}
 	});
   if (userData.data["retirementSavingAmountMonthly"] > 0) {
-  				userData.data["retirementSavings"] = (userData.data["retirementSavingAmountMonthly"] * 1200) / userData.data["annualIncome"]
+  				userData.data["retirementSavings"] = (userData.data["retirementSavingAmountMonthly"] * 1200) / (userData.data["monthlyIncome"]*12)
   }
 }
 			// "incomeRequired",
 function isThereAChange(userData) {
 	var types = ["currentAge",
 			"retirementAge",
-			"annualIncome",
+			"monthlyIncome",
 			"retirementSavings",
 			"currentRetirement",
 			"expectedIncrease",
@@ -505,7 +510,7 @@ function resetFormValues(userData, field) {
 
 function fillForm(userData) {
 	$("#retirementAmount").text(moneyFormat(userData.getRetirementTotal().reverse()[0]));
-	$("#incomeAtRetirement").text(moneyFormat(userData.getFinalIncome()));
+	$("#incomeAtRetirement").text(moneyFormat(userData.getFinalIncome()/12));
 	$("#incomeAfterRetirement").text(moneyFormat(userData.getInitialRetirementIncome()));
 	$("#initialSS").text(moneyFormat(userData.getSocialSecurity()));
 	$("#savings").text(moneyFormat(userData.getPeriodicSavings()));

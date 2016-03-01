@@ -11,7 +11,7 @@
 		<form id="retirementInputs" name="retirementInputs" action="#"> 
 			<input type="hidden" name="currentAge" id="currentAge" value="30" min="18" max="100">
 			<input type="hidden" name="retirementAge" id="retirementAge" value="67" min="55" max="100">
-			<input type="hidden" name="annualIncome" id="annualIncome" value="70000">
+			<input type="hidden" name="monthlyIncome" id="monthlyIncome" value="4000">
 			<input type="hidden" class="percent" name="retirementSavings" id="retirementSavings" value="15">
 			<input type="hidden" name="currentRetirement" id="currentRetirement" value="0">
 			<input type="hidden" id="includeSS_yes" name="includeSS" value="1" checked>
@@ -25,6 +25,7 @@
 			<input type="hidden" name="retirementSavingAmountMonthly" id="retirementSavingAmountMonthly" value="0">
 			<input type="hidden" name="compounding" id="compounding" value="4">
 			<input type="hidden" name="monthlyExpenditure" id="monthlyExpenditure" value="3000">
+			<input type="hidden" name="realLifeExpectancy" id="realLifeExpectancy" value="85">
 		</form>
 	<div id="results" >
 	   <div class="wrapper">
@@ -33,13 +34,10 @@
 					<p>You will have <span class="bolded"  id="retirementAmount"></span> at the age of retirement </p>
                 </div>
                 <div>
-					<p>Your estimated monthly income at retirement will be [CHANGE] <span class="bolded"  id="incomeAtRetirement"></span> </p>
+					<p>Retirement savings runs out at age <span class="bolded"  id="retireAge"></span> </p>
                 </div>
                   <div>
-					<p >To achieve your desired income you should have saved <span class="bolded"  id="idealTotalSavings"></span> by retirement </p>
-                </div>
-                <div>
-					<p>Retirement savings runs out at age <span class="bolded"  id="retireAge"></span> </p>
+					<p >To achieve your desired income you should have <br/>saved <span class="bolded"  id="idealTotalSavings"></span> by retirement </p>
                 </div>
                     <div>
 					<p>You need to save <span class="bolded"  id="savings"></span> monthly <br/>to receive <span class="bolded"  id="pmtv"></span> every month after retirement</p>
